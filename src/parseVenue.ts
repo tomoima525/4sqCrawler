@@ -21,8 +21,13 @@ export default function parseVenue(venue: VenueDetail): string {
     city
   } = location;
   const category = categories[0];
-  const { prefix, suffix } = bestPhoto;
-  const bestPhotoUrl = `${prefix}width960${suffix}`;
+  let bestPhotoUrl;
+  if (bestPhoto) {
+    const { prefix, suffix } = bestPhoto;
+    bestPhotoUrl = `${prefix}width960${suffix}`;
+  } else {
+    bestPhotoUrl = '';
+  }
   const data = {
     id: venue.id,
     name: venue.name,
