@@ -30,8 +30,8 @@ export default function parseVenue(venue: VenueDetail): string {
   }
   const data = {
     id: venue.id,
-    name: venue.name,
-    address,
+    name: `"${venue.name}"`,
+    address: `"${address}"`,
     lat,
     lng,
     postalCode,
