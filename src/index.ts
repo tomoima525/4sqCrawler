@@ -55,7 +55,7 @@ async function venuesFromCategory(resultDir: string, near: string, categoryId: s
 
 async function consolidateFiles(files: string[], mainFileName: string) {
   return Promise.all(files.map((file) => fs.readFileSync(file, 'utf-8')))
-    .then((results) => fs.writeFileSync(mainFileName, results.join('\n')))
+    .then((results) => fs.appendFileSync(mainFileName, results.join('')))
     .finally(() => {
       console.log('Generated ', mainFileName);
       files.map((file) => fs.unlinkSync(file));
