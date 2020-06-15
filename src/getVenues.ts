@@ -10,9 +10,13 @@ export default async function getVenues(params: string): Promise<Array<Venue>> {
     `v=${version}`,
     params
   ].join('&');
-  const url = `${baseUrl}/venues/search/?${queryParams}`;
-  const response = await fetch(url);
-  const json = await response.json();
-
-  return json.response.venues;
+  try {
+    const url = `${baseUrl}/venues/search/?${queryParams}`;
+    const response = await fetch(url);
+    const json = await response.json();
+    return json.response.venues;
+  } catch (e) {
+    console.log(`getVenues error ${e}`);
+    return [];
+  }
 }

@@ -118,6 +118,7 @@ dist
 
 # Typescript
 /build
+/result/*.csv
 
 
 test.csv

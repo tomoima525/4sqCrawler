@@ -2,31 +2,99 @@ import getVenues from './getVenues';
 import getSingleVenue from './getSingleVenue';
 import parseVenue from './parseVenue';
 import fs from 'fs';
+import yargs from 'yargs';
+
+import type { Empty, VenueDetail } from './types';
+
 console.log('Start fetching data');
-
-const queryParams = [`categoryId=4bf58dd8d48988d16c941735`, `radius=100000`, `limit=50`, `near=Chicago`].join('&');
-
-const fileName = 'test.csv';
-const header =
-  'id, name, address, lat, lng, postalCode, city, state, country, cc, categoryId, categoryName, primary, bestPhoto, rating, tips, createdAt\n';
-fs.appendFile(fileName, header, (err) => {
-  if (err) {
-    console.log('Failed with exception', err);
-    throw err;
+const { argv } = yargs.options({
+  citiesFile: {
+    demandOption: true,
+    describe: 'file path to the city list in csv',
+    type: 'string'
+  },
+  categoriesFile: {
+    demandOption: true,
+    describe: 'file path to the category list in csv',
+    type: 'string'
   }
-  console.log('File created: ', fileName);
 });
 
-getVenues(queryParams).then((venues) => {
-  Promise.all(
-    venues.map((venue) => {
-      return getSingleVenue(venue.id);
-    })
-  ).then((venueDetails) => {
-    venueDetails
-      .sort((a, b) => b.rating - a.rating)
-      .forEach((venueDetail) => {
-        fs.appendFileSync(fileName, `${parseVenue(venueDetail)}\n`);
+const { citiesFile, categoriesFile } = argv;
+if (!fs.existsSync(citiesFile) || !fs.existsSync(categoriesFile)) {
+  throw Error('cities and categories are required');
+}
+
+const cities = JSON.parse(fs.readFileSync(citiesFile, 'utf-8'));
+const categories = JSON.parse(fs.readFileSync(categoriesFile, 'utf-8'));
+
+function isVenueDetail(value: VenueDetail | Empty) {
+  return value !== undefined;
+}
+
+async function venuesFromCategories(resultDir: string, near: string, categories: any): Promise<string[]> {
+  return Promise.all(
+    categories.ids.map(async (id: string) => {
+      const queryParams = [`categoryId=${id}`, `radius=100000`, `limit=20`, `near=${near}`].join('&');
+      const tempFile = `${resultDir}/${near}_${id}`;
+      await getVenues(queryParams).then(async (venues) => {
+        return Promise.all(
+          venues.map((venue) => {
+            return getSingleVenue(venue.id);
+          })
+        ).then((venueDetails) => {
+          const files = venueDetails
+            .filter((result) => isVenueDetail(result))
+            .sort((a, b) => (<VenueDetail>b).rating - (<VenueDetail>a).rating)
+            .map((venueDetail) => {
+              fs.appendFileSync(tempFile, `${parseVenue(<VenueDetail>venueDetail)},${near}\n`);
+            });
+          return files;
+        });
       });
+      return tempFile;
+    })
+  );
+}
+
+async function consolidateFiles(files: string[], mainFileName: string) {
+  return Promise.all(files.map((file) => fs.readFileSync(file, 'utf-8')))
+    .then((results) => fs.writeFileSync(mainFileName, results.join('\n')))
+    .finally(() => {
+      console.log('Generated ', mainFileName);
+      files.map((file) => fs.unlinkSync(file));
+    });
+}
+
+async function generateShopList(resultDir: string, near: string, categories: any) {
+  const header =
+    'id, name, address, lat, lng, postalCode, city, state, country, cc, categoryId, categoryName, primary, bestPhoto, rating, tips, createdAt, near\n';
+  const fileName = `${resultDir}/result_${near.replace(' ', '_')}.csv`;
+
+  fs.appendFileSync(fileName, header);
+
+  const files: string[] = await venuesFromCategories(resultDir, near, categories);
+
+  console.log('=== temp files:', files);
+
+  await consolidateFiles(files, fileName);
+}
+
+async function wait(sleep: number) {
+  return new Promise((resolve) => {
+    return setTimeout(() => {
+      console.log(`wait ${sleep}`);
+      resolve(true);
+    }, sleep);
   });
-});
+}
+
+async function generateLists() {
+  for (const name of cities.names) {
+    console.log(`Generate shop list for ${name}`);
+    await generateShopList('result', name, categories);
+    await wait(60000);
+  }
+}
+
+generateLists();

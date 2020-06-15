@@ -42,3 +42,5 @@ export type VenueDetail = {
   categories: Array<Category>;
   createdAt: number;
 };
+
+export type Empty = undefined;
