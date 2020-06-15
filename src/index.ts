@@ -32,29 +32,25 @@ function isVenueDetail(value: VenueDetail | Empty) {
   return value !== undefined;
 }
 
-async function venuesFromCategories(resultDir: string, near: string, categories: any): Promise<string[]> {
-  return Promise.all(
-    categories.ids.map(async (id: string) => {
-      const queryParams = [`categoryId=${id}`, `radius=100000`, `limit=20`, `near=${near}`].join('&');
-      const tempFile = `${resultDir}/${near}_${id}`;
-      await getVenues(queryParams).then(async (venues) => {
-        return Promise.all(
-          venues.map((venue) => {
-            return getSingleVenue(venue.id);
-          })
-        ).then((venueDetails) => {
-          const files = venueDetails
-            .filter((result) => isVenueDetail(result))
-            .sort((a, b) => (<VenueDetail>b).rating - (<VenueDetail>a).rating)
-            .map((venueDetail) => {
-              fs.appendFileSync(tempFile, `${parseVenue(<VenueDetail>venueDetail)},${near}\n`);
-            });
-          return files;
+async function venuesFromCategory(resultDir: string, near: string, categoryId: string): Promise<string> {
+  const queryParams = [`categoryId=${categoryId}`, `radius=100000`, `limit=20`, `near=${near}`].join('&');
+  const tempFile = `${resultDir}/${near}_${categoryId}`;
+  await getVenues(queryParams).then(async (venues) => {
+    return Promise.all(
+      venues.map((venue) => {
+        return getSingleVenue(venue.id);
+      })
+    ).then((venueDetails) => {
+      const files = venueDetails
+        .filter((result) => isVenueDetail(result))
+        .sort((a, b) => (<VenueDetail>b).rating - (<VenueDetail>a).rating)
+        .map((venueDetail) => {
+          fs.appendFileSync(tempFile, `${parseVenue(<VenueDetail>venueDetail)},${near}\n`);
         });
-      });
-      return tempFile;
-    })
-  );
+      return files;
+    });
+  });
+  return tempFile;
 }
 
 async function consolidateFiles(files: string[], mainFileName: string) {
@@ -73,8 +69,13 @@ async function generateShopList(resultDir: string, near: string, categories: any
 
   fs.appendFileSync(fileName, header);
 
-  const files: string[] = await venuesFromCategories(resultDir, near, categories);
+  const files: string[] = [];
 
+  for (let i = 0; i < categories.ids.length; i++) {
+    if (i % 2 === 0) await wait(60000);
+    const tempFile = await venuesFromCategory(resultDir, near, categories.ids[i]);
+    files.push(tempFile);
+  }
   console.log('=== temp files:', files);
 
   await consolidateFiles(files, fileName);
