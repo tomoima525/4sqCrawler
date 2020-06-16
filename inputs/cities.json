@@ -1,14 +1,44 @@
 {
   "names": [
-    "New York",
-    "Los Angeles",
-    "Chicago",
-    "Houston",
-    "Phoenix",
-    "Philadelphia",
-    "San Antonio",
-    "San Diego",
-    "Dallas",
-    "San Jose"
+    {
+      "name": "New York",
+      "rank": "001"
+    },
+    {
+      "name": "Los Angeles",
+      "rank": "002"
+    },
+    {
+      "name": "Chicago",
+      "rank": "003"
+    },
+    {
+      "name": "Houston",
+      "rank": "004"
+    },
+    {
+      "name": "Phoenix",
+      "rank": "005"
+    },
+    {
+      "name": "Philadelphia",
+      "rank": "006"
+    },
+    {
+      "name": "San Antonio",
+      "rank": "007"
+    },
+    {
+      "name": "San Diego",
+      "rank": "008"
+    },
+    {
+      "name": "Dallas",
+      "rank": "009"
+    },
+    {
+      "name": "San Jose",
+      "rank": "010"
+    }
   ]
 }

@@ -1,13 +1,40 @@
 {
   "ids": [
-    "4bf58dd8d48988d16c941735",
-    "4bf58dd8d48988d128941735",
-    "4bf58dd8d48988d1cc941735",
-    "4bf58dd8d48988d110941735",
-    "4bf58dd8d48988d16a941735",
-    "4bf58dd8d48988d116941735",
-    "4bf58dd8d48988d1c9941735",
-    "4bf58dd8d48988d1c1941735",
-    "4bf58dd8d48988d10f941735"
+    {
+      "id": "4bf58dd8d48988d16c941735",
+      "name": "Burger"
+    },
+    {
+      "id": "4bf58dd8d48988d128941735,4bf58dd8d48988d16d941735,56aa371be4b08b9a8d573508",
+      "name": "Cafe"
+    },
+    {
+      "id": "4bf58dd8d48988d1cc941735",
+      "name": "Steak"
+    },
+    {
+      "id": "4bf58dd8d48988d110941735",
+      "name": "Italian Food"
+    },
+    {
+      "id": "4bf58dd8d48988d16a941735",
+      "name": "Bakery"
+    },
+    {
+      "id": "4bf58dd8d48988d116941735",
+      "name": "Bar"
+    },
+    {
+      "id": "4bf58dd8d48988d1c9941735",
+      "name": "Ice Cream"
+    },
+    {
+      "id": "4bf58dd8d48988d1c1941735",
+      "name": "Mexican Food"
+    },
+    {
+      "id": "4bf58dd8d48988d10f941735",
+      "name": "Indian Food"
+    }
   ]
 }
