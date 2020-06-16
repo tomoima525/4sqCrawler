@@ -5,7 +5,8 @@ import type { VenueDetail } from './types';
  * @param venue
  */
 export default function parseVenue(venue: VenueDetail): string {
-  const { location, categories, bestPhoto } = venue;
+  const { location, categories, bestPhoto, rating } = venue;
+  if (!rating || rating < 8) return '';
   if (!location) return '';
   const {
     labeledLatLngs,

@@ -32,9 +32,13 @@ function isVenueDetail(value: VenueDetail | Empty) {
   return value !== undefined;
 }
 
-async function venuesFromCategory(resultDir: string, near: string, categoryId: string): Promise<string> {
-  const queryParams = [`categoryId=${categoryId}`, `radius=100000`, `limit=20`, `near=${near}`].join('&');
-  const tempFile = `${resultDir}/${near}_${categoryId}`;
+async function venuesFromCategory(
+  resultDir: string,
+  near: string,
+  category: { id: string; name: string }
+): Promise<string> {
+  const queryParams = [`categoryId=${category.id}`, `radius=10000`, `limit=20`, `near=${near}`].join('&');
+  const tempFile = `${resultDir}/${near}_${category.name}`;
   await getVenues(queryParams).then(async (venues) => {
     return Promise.all(
       venues.map((venue) => {
@@ -45,11 +49,18 @@ async function venuesFromCategory(resultDir: string, near: string, categoryId: s
         .filter((result) => isVenueDetail(result))
         .sort((a, b) => (<VenueDetail>b).rating - (<VenueDetail>a).rating)
         .map((venueDetail) => {
-          fs.appendFileSync(tempFile, `${parseVenue(<VenueDetail>venueDetail)},${near}\n`);
+          const parsedVenue = parseVenue(<VenueDetail>venueDetail);
+          if (parsedVenue !== '') {
+            fs.appendFileSync(tempFile, `${parsedVenue},${near},${category.id}, ${category.name}\n`);
+          }
         });
       return files;
     });
   });
+
+  if (!fs.existsSync(tempFile)) {
+    fs.appendFileSync(tempFile, '');
+  }
   return tempFile;
 }
 
@@ -58,14 +69,13 @@ async function consolidateFiles(files: string[], mainFileName: string) {
     .then((results) => fs.appendFileSync(mainFileName, results.join('')))
     .finally(() => {
       console.log('Generated ', mainFileName);
-      files.map((file) => fs.unlinkSync(file));
     });
 }
 
-async function generateShopList(resultDir: string, near: string, categories: any) {
+async function generateShopList(resultDir: string, near: string, rank: string, categories: any) {
   const header =
-    'id, name, address, lat, lng, postalCode, city, state, country, cc, categoryId, categoryName, primary, bestPhoto, rating, tips, createdAt, near\n';
-  const fileName = `${resultDir}/result_${near.replace(' ', '_')}.csv`;
+    'id, name, address, lat, lng, postalCode, city, state, country, cc, categoryId, categoryName, primary, bestPhoto, rating, tips, createdAt, near, chompCategoryId, chompCategoryName\n';
+  const fileName = `${resultDir}/result_${rank}_${near.replace(' ', '_')}.csv`;
 
   fs.appendFileSync(fileName, header);
 
@@ -91,9 +101,9 @@ async function wait(sleep: number) {
 }
 
 async function generateLists() {
-  for (const name of cities.names) {
-    console.log(`Generate shop list for ${name}`);
-    await generateShopList('result', name, categories);
+  for (const data of cities.names) {
+    console.log(`Generate shop list for ${data.name}`);
+    await generateShopList('result', data.name, data.rank, categories);
     await wait(60000);
   }
 }
