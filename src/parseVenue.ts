@@ -45,6 +45,7 @@ export default function parseVenue(venue: VenueDetail): string {
     primary: category.primary,
     bestPhoto: bestPhotoUrl,
     rating: venue.rating,
+    ratingSignals: venue.ratingSignals,
     tips: venue.tips.count,
     createdAt: venue.createdAt
   };
