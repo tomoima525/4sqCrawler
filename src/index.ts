@@ -40,6 +40,7 @@ async function venuesFromCategory(
   const queryParams = [`categoryId=${category.id}`, `radius=10000`, `limit=20`, `near=${near}`].join('&');
   const tempFile = `${resultDir}/${near}_${category.name}`;
   await getVenues(queryParams).then(async (venues) => {
+    if (!venues) return;
     return Promise.all(
       venues.map((venue) => {
         return getSingleVenue(venue.id);
@@ -51,7 +52,7 @@ async function venuesFromCategory(
         .map((venueDetail) => {
           const parsedVenue = parseVenue(<VenueDetail>venueDetail);
           if (parsedVenue !== '') {
-            fs.appendFileSync(tempFile, `${parsedVenue},${near},${category.id}, ${category.name}\n`);
+            fs.appendFileSync(tempFile, `${parsedVenue},${near},${category.name},"${category.id}"\n`);
           }
         });
       return files;
@@ -74,7 +75,7 @@ async function consolidateFiles(files: string[], mainFileName: string) {
 
 async function generateShopList(resultDir: string, near: string, rank: string, categories: any) {
   const header =
-    'id, name, address, lat, lng, postalCode, city, state, country, cc, categoryId, categoryName, primary, bestPhoto, rating, tips, createdAt, near, chompCategoryId, chompCategoryName\n';
+    'id, name, address, lat, lng, postalCode, city, state, country, cc, categoryId, categoryName, primary, bestPhoto, rating, tips, createdAt, near, chompCategoryName, seachedCategoryId\n';
   const fileName = `${resultDir}/result_${rank}_${near.replace(' ', '_')}.csv`;
 
   fs.appendFileSync(fileName, header);
