@@ -36,8 +36,9 @@ export type VenueDetail = {
   id: string;
   name: string;
   rating: number;
-  bestPhoto: BestPhoto;
+  ratingSignals: number;
   tips: Tips;
+  bestPhoto: BestPhoto;
   location: Location;
   categories: Array<Category>;
   createdAt: number;
